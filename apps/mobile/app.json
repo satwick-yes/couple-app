@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "name": "LDR App",
+    "slug": "ldr-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.satwik.ldrapp"
+    },
+    "android": {
+      "package": "com.satwik.ldrapp"
+    },
+    "web": {
+    }
+  }
+}

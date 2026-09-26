@@ -1,0 +1,14 @@
+{
+  "name": "ldr-app-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev --workspace=web-backend",
+    "dev:mobile": "npm run start --workspace=mobile",
+    "dev": "npx concurrently \"npm run dev:backend\" \"npm run dev:mobile\""
+  }
+}

@@ -1,0 +1,97 @@
+// apps/web-backend/prisma/schema.prisma
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"] // Required for pgvector
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector] // Enable pgvector extension
+}
+
+model Couple {
+  id                 String   @id @default(uuid())
+  createdAt          DateTime @default(now())
+  
+  users              User[]
+  messages           Message[]
+  virtualPet         VirtualPet?
+  journeys           Journey[]
+  
+  // Widget Data
+  latestWidgetImgUrl String?
+  widgetUpdatedAt    DateTime?
+  
+  // Shared Canvas Data (Current state could be persisted here or in memory)
+  canvasDataUrl      String?  
+}
+
+enum PlatformOS {
+  IOS
+  ANDROID
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  
+  coupleId     String
+  couple       Couple   @relation(fields: [coupleId], references: [id])
+  
+  platformOS   PlatformOS
+  pushToken    String?
+  
+  // App engagement metrics for Virtual Pet health
+  lastInteraction DateTime @default(now())
+  
+  messagesSent Message[]
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+  
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id])
+  
+  coupleId  String
+  couple    Couple   @relation(fields: [coupleId], references: [id])
+
+  // Vector embedding for AI "Recall" Feature
+  // 768 is the typical dimension for Gemini embeddings
+  embedding Unsupported("vector(768)")? 
+}
+
+model VirtualPet {
+  id          String   @id @default(uuid())
+  name        String
+  type        String   @default("dog")
+  
+  healthScore Int      @default(100) // Drops over time, increased by app usage
+  level       Int      @default(1)
+  
+  lastFedAt   DateTime @default(now())
+  
+  coupleId    String   @unique
+  couple      Couple   @relation(fields: [coupleId], references: [id])
+}
+
+model Journey {
+  id              String   @id @default(uuid())
+  title           String   // e.g., "Reeya visits Delhi!"
+  targetDate      DateTime
+  
+  // Flight/Train tracking info
+  transportNumber String?  // e.g., "AI 101"
+  transportType   String?  // "FLIGHT" or "TRAIN"
+  
+  coupleId        String
+  couple          Couple   @relation(fields: [coupleId], references: [id])
+}
